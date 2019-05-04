@@ -3,24 +3,12 @@ grammer =grammerFile.read().splitlines()
 print("Here is your grammer : ",grammer)
 nullableForSure = [rule[0] for rule in grammer if rule.endswith("→ϵ")]
 
-# print(nullableForSure)
-# tempGrammerFile = open("tempGrammer.txt","w+")
-# tempGrammerFile.write('\n'.join(grammer))
-
-# for nonTerminal in nullableForSure:
-#     fileStr = tempGrammerFile.read()
-#     tempGrammerFile.write(fileStr.replace(nonTerminal,"ϵ"))
-#     tempGrammerFile.flush()
-
 print("-"*40)
 # --------------------------------------------------
 # step 1 Nullable non terminal & Rule number
 # --------------------------------------------------
-for index , rule in enumerate(grammer):
-    # rightHandSide = rule.split("→")[1]
-    # print(rightHandSide)
-
-    # step 1 Nullable non terminal & Rule number
+nonTerminalNullable = []
+for index , rule in enumerate(grammer):    
     string = ""
   
     for char in rule.split("→")[1]:
@@ -28,6 +16,7 @@ for index , rule in enumerate(grammer):
             string+= char
 
     if rule.split("→")[1] == string:
+        nonTerminalNullable.append([rule.split("→")[0] , index+1])
         print("Step 1:","Nullable non terminal",rule.split("→")[0],"Rule",index+1)
 print("-"*40)
 
@@ -196,4 +185,37 @@ for relation in EO:
 
 for relation in EFB:
     print("Step 10:",relation[0],"Is Followed By",relation[1])
+print("-"*40)
+
+# ----------------------------------------------------
+# Step 11 Follow Set for each nullable nonterminal
+# ----------------------------------------------------
+followSets = {}
+for index , nonTerminal in enumerate(nonTerminalNullable):
+    followSets[ nonTerminal[0] ] = set()
+    for relation in EFB:
+        if relation[0] == nonTerminal[0] and relation[1].islower():
+            followSets[nonTerminal[0]].add(relation[1])
+for symbol , followset in followSets.items():
+    print("Step 11:",symbol+"'s Follow Set Is",followset)
+print("-"*40)
+
+# -------------------------------------
+# Step 12 Selection Set for each rule
+# -------------------------------------
+
+selectionSets = []
+for index , rule in enumerate(grammer):   
+    RHS = rule.split("→")[1]
+    for nonTerminal in nonTerminalNullable:
+        if index+1 != nonTerminal[1]:
+            # not nullable
+            selectionSets.insert(index,firstOfRHS[RHS])       
+        else:
+            # nullable
+            selectionSets.insert(index,firstOfRHS[RHS].union(followSets[rule.split("→")[0]]))  
+
+for index , relation in enumerate(selectionSets):
+    print("Step 12: Rule",str(index+1)+"'Selection Set Is",relation)
+
 print("-"*40)
